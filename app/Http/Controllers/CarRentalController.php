@@ -46,13 +46,18 @@ class CarRentalController extends Controller
 
         try {
             // validasi ketersediaan
-            CarRental::where('car_id', '=', $validated['car_id'])
+            $is_rented = CarRental::where('car_id', '=', $validated['car_id'])
                 ->where('from_time', '<=', $validated['from_time'])
-                ->where('end_time', '>=', $validated['end_time']);
+                ->where('end_time', '>=', $validated['end_time'])
+                ->exists();
 
-            //code...
+            if (!$is_rented) {
+                CarRental::create($validated);
+            }
         } catch (\Throwable $th) {
-            //throw $th;
+            return redirect()->route('car-rentals.create')->with('failed', 'Gagal menyewa mobil');
         }
+
+        return redirect()->route('car-rentals.create')->with('success', 'Berhasil menyewa mobil');
     }
 }
